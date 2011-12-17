@@ -1,0 +1,7 @@
+Adding a new item
+
+1) Add in the coresponding panel in agw designer
+2) add to frame.image list
+3) MSE: insert in correspondance dict
+3.5) create element derivated 
+4) My Add Shape to give it a shape
