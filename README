@@ -1,100 +1,53 @@
-O.POYEN - OCtober 2011
+I've been building a card/tiles making software for some time now. Before releasing it, I'd like to see whether there is a need for it and what kind of features it should have.
+
+So far, the program I have made (python langage based) have the following features:
+1) create ready to print Card/Tiles sheets, placing images on a sheet in order to ease dual printing of image
+
+This feature is the most important one. It allows to simply create a deck of card or tiles from existing images, saving this deck in CSV/Excel format.
+You can simply change their quantity and format them to the same size, creating dual printing pages if asked.
+
+This is the "raison d'être" of the software. At the time, I wanted to be able to easily print some card proxy for my Collectible Card Game sessions.
 
 
-Purpose of the software
-Python script to create template for MSE (magic set editor)
-
-Available where python & wxpython are.
-Compiled as executable for Windows platform
-MAC compatibility on-going....
-
-1 Installation
-Unzip archive & start designer.exe file
-**Edit bgm.ini file and change in the last part the information regarding your MSE setup (path & version)**
+2) Add simple image transformation to your deck
+Software comes with a bunch of template to transform your image before creating printing sheet. Think what some inkscape scripts would do.
+Some examples of implemented features:
+- add a custom border to an image
+- divide the image in several sub-ones (especially useful to split a board into several card-sized pictures)
+- transforming an image to an origami-dice shaped one
 
 
-2. Screen part details
-The interface is divided in the following parts:
-- a toolbar on the top, for opening & saving template file & exporting (creating) the Game & Style folder
-- a list of fields that can be added to your template - on the left
-- a blank card on which you can position your template fields - in the middle
-- a tree listing all fields that has been added to your template - on the upper right
-- a properties panel for setting the properties of your fields (like name, description, choice images,....)
+
+3) Add some simple script to create & fill your deck
+Think what nandeck would do here. Software can understand script in order to directly add card. 
+Some example of implemented script:
+- cut an existing picture in 6 subimage and create an origami dice for it
+- duplicate an existing deck to add greyscale dual copy of each card
 
 
-3. Classical usage
-When the software starts, it creates a blank template
-You can already set several things in the lower right property grid regarding the game attribute & style attribute (like name, card size, DPI....)
-Make sure to fill the game name (Template by default)
-Then double click on the elements in the left part of the designer to add them to your template? Let say we want to add 2 text boxes & an image boxes.
-Just double click twice on Text and once on Image.
-For each of these, a blank rectangle has appeared in the middle of the blank card. You can move them at your will. 
-Furthermore, you can edit their properties thanks to the property grid on the right. 
-The grid take the majority of the property listed in MSE documentation.
-
-Once you are done, you can:
-1) save your template file (with save button in the toolbar). This will allow you to create a small file that you can load latter to rework on your template
-2) on, most important, you can export your template. This will create the 2 folders (mse game & style), according to the information you had previously submitted. 
-
-You'll see that any file listed in your template (like the card sample icon used for template representation) will be copied to the created folders. 
-Then, you just have to ensure that the 2 folders are copied to your MSE directory & you are good to go.
-
-New in V0.3: thansk to helper functions in the bottom left, you can now directly install in your MSE Path
-
-If the software proves itself useful, I will gladly add installer generator & Set generator based on excel files. 
+This feature comes next to the first one. I wanted to be able to create easy card games easily, with an high level program langage. 
+Something like: 
+for color in (red,blue,green):
+for value in (2,3,4):
+deck.AddCard(color,value)
+That is what those scripts do.
 
 
-Known bug & issues:
-In the property grid (bottom right) do not fold the properies ("MSE Game properties", "MSE Style properties"). Otherwise, export won't work.
+4) Creating your own High Level Template
+Once you have mastered the basic usages, you can launch the template designer, which is a WYSIWIG interface to create template, like the one existing in Magic Set Editor software. Contrary to magic set software, template are created from the GUI. 
+With such template, you can create a simple excel/CSV file holding the data from your deck. The software will create the image for you.
+Think cardmaker software, here.
 
 
-FAQ:
-1. Help, my element disappeared from template !
-For ease of usage, you can send an element in the background by double clicking it.
-It this happen by mistake, just double click on other items to also send them in the background 
+This feature cames with me playing with the Magic Set Editor Software. I wanted to do the same things, without being obliged to re-learn the text-based template system. As a side effect, my software is able to export is template to Magic Set Editor Format.
 
-2. What about these .tmpl files
-Tmpl files are not used by Magic Set Editor. They are used by designer to save the template & reload it later.
-No need to save it in the template file
+5) Directly enhance the program script & template throught python langage.
 
-3. How to change my game name ? 
-When creating a template, you can change your game name & the style name in the propery grid (bottom right).
-First click on the template (either in the middle pane or the root of your elements tree in the upper right panel). 
-Then, in the property grid, choose "shortname" to change the game name and 'style short name' to change style short name.
-These changes will affect the name of the generated folder (GameName.mse-game & GameName-StyleName.mse-style)
+Sometime, you just want to directly code your solution. Program is designed to allow for template & script coding, directly in Python.
 
-4.How do I work with Choices for 'Choices Images'
-Add a choice element to your template. In the property grid, choose 'Choices' in 'MSE Game properties' and add the different label for your change.
-Then, in 'MSE Style properties', choose render style to 'Image', for exemple. Then, in choice image, select the image for each Choice label.
-On export, the images selected will be copied to your style file.
+--------------------------------------------------------------------
+I've been using it for some time now. 
+It is especially useful for translating existing games. Just browse for some image in BGG. Then create a template based on these images and translate the component thanks to your template. 
 
-5. What are these staticimage thinks: To help you design your template, just add a staticimage pointing to an image you want to reproduce. 
-Then add your fields as usual. At the end, tou can remove staticimage from the template. If by mistake you export your template, StaticImage won't be exported.
-
-6. How do I work with Set (generating Set from Excel file,...)
-You can add a Set like you add a text field. Set has only a name and an excel file.
-This excel file is a CSV file with the following columns: 
-- Name : (identifier of a card)
-- Qt: an integer with the quantity of the card
-- One Column with the Name of the Field from your template
-
-You can then fill the CSV file with one line per card with the same template values. 
-Link this to your Element Set fields in your template. 
-You can now either create a Set (Set Maker button) or directly create all iamges (Image Maker button)
-
-
-History:
-V03:
-* add nicer button
-* Add Template Installer (just add your mse path to bgm.ini file)
-* Designer can now create mse set file based on excel file
-* Designer can directly generate batches of image file from a set & based on current template
-* add a "duplicate" function, only available by keyboard shortcut: CTRL-D
-* add a static image tool: this will load an image in current template to help you set your fields. This static image won't be saved to template
-v2: 
-*add save as option
-*change default name to template
-*add set exporter (beta)
-*add static image helper
-
-V1: first release
+This is a lot to read. The program is ready, but in alpha quality. 
+I do not have any place to host it yet. Nevertheless, let me know if this may be of any interest for some of you and what type of features would you like to see in it, with so many solution already existing (NAndDeck, cardmaker, Magic Set Editor,.....)
