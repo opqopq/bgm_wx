@@ -16,7 +16,127 @@ class GameBoxScript(Script):
     column['Length(cm) - optional']=('float',0.0)
     column['Width(cm) - optional']=('float',0.0)
 
-    def run(self,frame,values=None):
+    def run(self,mainframe,values=None):
+        BLACK=0
+        from config import card_folder, a4_size, PRINT_FORMAT
+        from os.path import join,isfile,splitext
+        from math import sqrt, radians
+        from ImageOps import grayscale
+        dst=values['Destination file']
+        DEPTH=values['Depth(cm)']
+        LENGTH=values['Length(cm) - optional']
+        WIDTH=values['Width(cm) - optional']
+        if not dst:
+            dlg = wx.FileDialog(mainframe, "Choose a destination file for Box Front", mainframe.deckdir, "box.png", "*.*", wx.SAVE| wx.OVERWRITE_PROMPT)
+            try:
+                if dlg.ShowModal() == wx.ID_OK:
+                    dst = dlg.GetPath()
+                else:
+                    return
+            finally:
+                dlg.Destroy()
+        name,ext=splitext(dst)
+        dstfront='.'.join([name,'front'])+ext
+        dstback='.'.join([name,'back'])+ext
+        front=values['front']
+        if not isfile(front):
+            front=None
+        back=values['back']
+        if not isfile(back):
+            back=None
+        sidelr=values['side (left/right)']
+        if not isfile(sidelr):
+            sidelr=None
+        sidetb=values['side (top/bottom)']
+        if not isfile(sidetb):
+            sidetb=None
+        #Determine tuckbox size
+        width,length=mainframe.fitting_size
+        from config import left, right, bottom, top, a4_size, DEBUG, PRINT_FORMAT, card_folder, sheet_left, sheet_top, BLACK_FILLING
+        width+=left+right+5  + 10 #10 added to make some place for the card around it in the tuckbox
+        length+=top+bottom+5 
+        length=float(length+10)
+        width=float(width+10)
+        deep=10+float((mainframe.deckgrid.GetDeckSize()))* 2.5
+        import config
+        if DEPTH:
+            deep=config.cm2p(DEPTH)
+        if LENGTH:
+            length=config.cm2p(LENGTH)
+        if WIDTH:
+            width=config.cm2p(WIDTH)
+        #Adapt length & width to have back insert in to front
+        lengthFront=length+10
+        widthFront=width+10
+        #Create Tuckboxes lines
+        import Image, ImageDraw
+        #w,l=a4_size
+        w=int(3*deep+2*width+1)
+        l=int(3*deep+length +1)
+        if sorted((w,l))>sorted(a4_size):
+            print "won't fit in a4 page"
+        _W,_L=a4_size
+        sheet=Image.new('RGB', (_W,_L),(255,255,255))
+        sheetFront=Image.new('RGB',(_W,_L),(255,255,255))
+        drawFront=ImageDraw.Draw(sheetFront)
+        draw=ImageDraw.Draw(sheet)
+        #Draw necessary lines
+        rw=7*deep/8
+        rl=deep/4
+        for d,w,l in zip((draw,drawFront),(width,widthFront),(length,lengthFront)):
+            d.rectangle((0,deep-rl,rw,deep),outline=BLACK)
+            d.rectangle((0,l+deep,rw,l+deep+rl),outline=BLACK)
+            d.rectangle((deep+w+deep-rw,deep-rl,deep+w+deep,deep),outline=BLACK)
+            d.rectangle((deep+w+deep-rw,l+deep,deep+w+deep,l+deep+rl),outline=BLACK)
+            d.line((rw,deep-rl, deep,deep),fill=BLACK)
+            d.line((rw,deep-rl, deep,deep),fill=BLACK)
+        #Now copy & resize images in the tuckboxes
+        length=int(length)
+        width=int(width)
+        deep=int(deep)
+        
+        if front:
+            front_image=Image.open(front)
+            front_image=front_image.resize((widthFront,lengthFront))
+            sheetFront.paste(front_image,(deep,deep))
+        if back:
+            back_image=Image.open(back)
+            back_image=back_image.resize((width,length))
+            sheet.paste(back_image,(deep,deep))
+        if sidelr:
+            side=Image.open(sidelr)
+            side=grayscale(side.resize((length,deep)))
+            lside=side.rotate(90,expand=True)
+            rside=side.rotate(270,expand=True)
+            sheet.paste(rside,(0,deep))
+            sheet.paste(lside,(deep+width,deep))
+            
+            side=Image.open(sidelr)
+            side=side.resize((lengthFront,deep))
+            lside=side.rotate(90,expand=True)
+            rside=side.rotate(270,expand=True)
+            sheetFront.paste(rside,(0,deep))
+            sheetFront.paste(lside,(deep+widthFront,deep))
+            
+        if sidetb:
+            side=Image.open(sidetb)
+            side=grayscale(side.resize((width,deep)))
+            bside=side.rotate(180,expand=True)
+            sheet.paste(side,(deep,0))
+            sheet.paste(bside,(deep,length+deep))
+
+            side=Image.open(sidetb)
+            side=side.resize((widthFront,deep))
+            bside=side.rotate(180,expand=True)
+            sheetFront.paste(bside,(deep,0))
+            sheetFront.paste(side,(deep,lengthFront+deep))
+            
+            
+        #Save & display
+        sheet.save(dstback)
+        sheetFront.save(dstfront)
+        import os
+        os.startfile(dstfront)
         return
         
 script_gb=GameBoxScript()
@@ -45,7 +165,7 @@ class TuckBoxScript(Script):
         LENGTH=values['Length(cm) - optional']
         WIDTH=values['Width(cm) - optional']
         if not dst:
-            dlg = wx.FileDialog(mainframe, "Choose a destination file", mainframe.deckdir, "", "*.*", wx.SAVE| wx.OVERWRITE_PROMPT)
+            dlg = wx.FileDialog(mainframe, "Choose a destination file", mainframe.deckdir, "tuckbox.png", "*.*", wx.SAVE| wx.OVERWRITE_PROMPT)
             try:
                 if dlg.ShowModal() == wx.ID_OK:
                     dst = dlg.GetPath()

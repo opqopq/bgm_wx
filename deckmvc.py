@@ -90,7 +90,7 @@ class DeckModel(dv.PyDataViewIndexListModel):
         self.cards=list()
 
     def GetColumnCount(self):
-        return len(self.columns)+len(self.templateColumns)
+        return len(columns)+len(self.templateColumns)
                  
     def GetColumnType(self,col):
         if col<len(columns):
