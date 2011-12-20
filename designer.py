@@ -144,6 +144,7 @@ class WYSIFrame(wx.Frame):
         il.debugelt= il.Add(wx.Bitmap('img/debug.png').ConvertToImage().Rescale(*tsize).ConvertToBitmap())
         il.keywordelt=il.Add(wx.Bitmap('img/keyword.png').ConvertToImage().Rescale(*tsize).ConvertToBitmap())
         il.mseelt=il.Add(wx.Bitmap('img/mse.jpg').ConvertToImage().Rescale(*tsize).ConvertToBitmap())        
+        il.symbolelt=il.Add(wx.Bitmap('img/symbol_icon.png').ConvertToImage().Rescale(*tsize).ConvertToBitmap())        
         self.il=il
 
     def CreateFieldsPanel(self):
@@ -162,6 +163,7 @@ class WYSIFrame(wx.Frame):
         #~ info._text = "Type"        
         #~ l.InsertColumnInfo(0, info)
 
+        index = l.InsertImageStringItem(0, "Symbols",self.il.symbolelt)
         index = l.InsertImageStringItem(0, "Info",self.il.infoelt)
         index = l.InsertImageStringItem(0, "Set",self.il.setelt)
         index = l.InsertImageStringItem(0, "Color",self.il.colorelt)
@@ -821,6 +823,7 @@ class WYSIFrame(wx.Frame):
             'Set':self.il.setelt,
             'Color':self.il.colorelt,
             'Keyword':self.il.keywordelt,
+            'Symbols':self.il.symbolelt,
         }
 
         if blank.Type=="template":#Root style 

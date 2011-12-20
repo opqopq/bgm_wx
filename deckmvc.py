@@ -43,9 +43,9 @@ defaults={
     
 columns_type={
               'Qt':int,
-              'Dual ?': strbool,
-              'Rotated ?': strbool,
-              'Fit ?': strbool,
+              'Dual': strbool,
+              'Rotated': strbool,
+              'Fit': strbool,
               }
      
 template_columns_type={ 
@@ -323,13 +323,12 @@ class DeckGrid(dv.DataViewCtrl):
         
     def GetDeckSize(self,dual=False):  
         front,back=0,0
-        for i in range(len(self.model.cards)):
-            #Int has been added to address a shortcoming in MVC datavaiew widget
-            dc=self.model.cards[i]            
-            if dc.Dual:
-                back+=dc.Qt
+        for c in self.model.cards:
+            #Int has been added to address a shortcoming in MVC datavaiew widget          
+            if c.Dual:
+                back+=c.Qt
             else:
-                front+=dc.Qt     
+                front+=c.Qt     
         if dual:
             return (front,back)
         return front+back
@@ -391,7 +390,6 @@ class DeckGrid(dv.DataViewCtrl):
     def Load(self,path,appendMode=False):
         import csv
         #from unicode_csv import UnicodeReader as reader
-        print 'skipping univcode csv for now'
         from csv import DictReader, reader
         if not appendMode:
             self.SelectAll()
@@ -463,4 +461,3 @@ class DeckGrid(dv.DataViewCtrl):
                 if DEBUG: print 'Adding to deck card',card
             ##self.AppendRow(grow)
             self.AppendCard(card)
-

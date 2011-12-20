@@ -12,7 +12,7 @@ SRC='bgm.ini'
 #Table with section name, option name, variable name, default value, and function to be applyied to it
 configItem=[
         #Card Folder basis for all development
-        ('card','src','card_folder',None, None),
+        ('card','src','card_folder','', None),
         ('user','deckdir','deckdir','.', None),
         #Gap between card
         ('size','x_pad','x_pad',5,int),
@@ -32,6 +32,8 @@ configItem=[
         ('cardborder','right','right',8,int),
         #Print Format
         ('print','format','PRINT_FORMAT','png',None),
+        #Print engine
+        ('print','engine','PRINT_ENGINE','pdf',None),
         #Mse
         #MSE data
         ('mse','path','MSE_PATH','',None),
@@ -88,7 +90,7 @@ def cm2p(cm):
     return int(round(cm/2.54*DPI))
     
 def p2cm(px):
-    return int(round(px*2.54/DPI))
+    return px*2.54/DPI
     
 
 def get(section,option):

@@ -555,6 +555,13 @@ class TxtElement(GameField):
                 align|=getattr(wx,'ALIGN_'+x.replace('middle','center').upper())
         dc.DrawLabel(wrapped_text,_r, align)
 
+class SymbolTxtElement(TxtElement):
+    Type="symbols"
+    specific_params=[
+        ('symbols',['symbols',None]),
+        
+    
+    ]
 class ChoiceElement(GameField):
     Type='choice'
     choice_template="	choice:	%s"

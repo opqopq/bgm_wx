@@ -236,6 +236,153 @@ class ImgListProperty(wxpg.PyStringProperty):
         # Set what happens on button click
         return ImgListDialogAdapter()
 
+class SymbolListProperty(wxpg.PyStringProperty):
+    def __init__(self, label, name=wxpg.LABEL_AS_NAME, value=''):
+        wxpg.PyStringProperty.__init__(self, label, name, value)
+
+    def GetEditor(self):
+        # Set editor to have button
+        return "TextCtrlAndButton"
+
+    def GetEditorDialog(self):
+        # Set what happens on button click
+        return SymbolListDialogAdapter()
+
+class SymbolListDialogAdapter(wxpg.PyEditorDialogAdapter):
+    """ This demonstrates use of wxpg.PyEditorDialogAdapter.
+    """
+    def __init__(self):
+        wxpg.PyEditorDialogAdapter.__init__(self)
+
+    def DoShowDialog(self, propGrid, property):
+        #First find if there is a default path for lloking for images
+        frame=propGrid.Parent.Parent
+        src_dir=frame.dir
+        
+        if hasattr(frame,"file"):
+            import os.path
+            path=os.path.split(frame.file)[0]
+        else:
+            path="."
+        choices=property.GetValue()
+        if not choices:
+            from collections import OrderedDict
+            choices=OrderedDict()
+        
+        dialog=wx.Dialog(frame,size=(500,200),style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        dialog.Title='Symbols  Choice Chooser'
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        panel = scrolled.ScrolledPanel(dialog, size=(300, 150), style = wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER)
+        fgs1 = wx.FlexGridSizer(cols=3, vgap=4, hgap=4)
+
+        label = wx.StaticText(dialog, -1, "Images for Symbol listed in Text field")
+        sizer.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        sizer.Add(panel,1,wx.ALL|wx.EXPAND,2)
+        
+        self.fbbs=dialog.fbbs=dict()
+        import os.path
+        for choice,fpath in enumerate(choices.values()):
+            #box = wx.BoxSizer(wx.HORIZONTAL)
+            cb=wx.CheckBox(panel)
+            fgs1.Add(cb,0, wx.ALIGN_CENTRE_VERTICAL|wx.ALL, 5)
+            label = wx.TextCtrl(panel, -1, choice)
+            #box.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+            fgs1.Add(label, 0, wx.ALIGN_CENTRE_VERTICAL|wx.ALL, 5)
+            text=filebrowse.FileBrowseButton(panel,initialValue=fpath)
+            #box.Add(text, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+            fgs1.Add(text, 1, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
+            #sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+            self.dialog.fbbs[cb]=text
+            cb._fbb=text
+            cb._tc=label
+            if not os.path.isfile(fpath) and os.path.isfile(os.path.join(config.card_folder,fpath)):
+                    text.SetValue(os.path.join(config.card_folder,_v))
+        #Add Remove Button
+        box=wx.BoxSizer()
+        btn=wx.Button(dialog,label="+",size=(30,-1))
+        box.Add(btn)
+        btn.Bind(wx.EVT_BUTTON,self.OnAddSymbol)
+        btn=wx.Button(dialog,label="-",size=(30,-1))
+        btn.Bind(wx.EVT_BUTTON,self.OnRemoveSymbol)
+        box.Add(btn)
+        sizer.Add(box,0,wx.ALL,10)
+        #Close button
+        btnsizer = wx.StdDialogButtonSizer()
+        btn = wx.Button(dialog, wx.ID_OK)
+        btn.SetDefault()
+        btnsizer.AddButton(btn)
+
+        btn = wx.Button(dialog, wx.ID_CANCEL)
+        btnsizer.AddButton(btn)
+        btnsizer.Realize()
+
+        sizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL, 15)        
+
+        panel.SetSizer( fgs1 )
+        panel.SetAutoLayout(1)
+        panel.SetupScrolling()
+        self.panel=panel
+        dialog.Sizer=sizer
+        dialog.SetAutoLayout(1)
+        
+        sizer.Fit(dialog)
+
+        dialog.CenterOnScreen()
+        # this does not return until the dialog is closed.
+        val = dialog.ShowModal()
+        done=False
+        if val == wx.ID_OK:
+            res=OrderedDict()
+            for c in panel.GetChildren():
+                if c.__class__ == wx.CheckBox and c.Shown:
+                    label=c._tc.Value
+                    path=c._fbb.GetValue() or "" 
+                    print "path is", type(path), "'%s'"%path , "'%s'"%c._fbb.GetValue()
+                    print 'cfold is',type(config.card_folder), "'%s'"%config.card_folder
+                    if path.startswith(src_dir):
+                        path=os.path.relpath(path,start=src_dir)
+                    elif path.startswith(config.card_folder):
+                        path=os.path.relpath(path,start=config.card_folder)
+                    res[label]=path
+            self.SetValue(res)
+            done=True
+        dialog.Destroy()
+        return done
+        
+    def OnAddSymbol(self,evt):
+        cb=wx.CheckBox(self.panel)
+        self.panel.Sizer.Add(cb,0, wx.ALIGN_CENTRE_VERTICAL|wx.ALL, 5)
+        label = wx.TextCtrl(self.panel, -1, "[Symbol]")
+        #box.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        self.panel.Sizer.Add(label, 0, wx.ALIGN_CENTRE_VERTICAL|wx.ALL, 5)
+        text=filebrowse.FileBrowseButton(self.panel)
+        #box.Add(text, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
+        self.panel.Sizer.Add(text, 1, wx.EXPAND|wx.ALL|wx.ALIGN_CENTER_HORIZONTAL, 5)
+        #sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        self.fbbs[cb]=text
+        cb._tc=label
+        cb._fbb=text
+        self.panel.Sizer.Layout()
+
+    def OnRemoveSymbol(self,evt):
+        for c in self.panel.GetChildren():
+            if c.__class__ == wx.CheckBox:
+                if c.Value and c.Shown:
+                    del self.fbbs[c]
+                    self.panel.Sizer.Remove(c._tc)
+                    self.panel.Sizer.Remove(c._fbb)
+                    self.panel.Sizer.Remove(c)
+
+                    c._tc.Show(False)
+                    c._fbb.Show(False)
+                    c.Show(False)
+                    self.panel.Sizer.Layout()
+        self.panel.Refresh()
+                    
+            
+        
+    
 class SuperFontDialogAdapter(wxpg.PyEditorDialogAdapter):
     """ This demonstrates use of wxpg.PyEditorDialogAdapter.
     """
@@ -309,7 +456,6 @@ class SuperFontProperty(wxpg.PyStringProperty):
         # Set what happens on button click
         return SuperFontDialogAdapter()
 
-
 def strbool(x):
     if x.lower()=='false':
         return False
@@ -348,6 +494,8 @@ forms={
     'mchoices':wxpg.MultiChoiceProperty,
     'choice':wxpg.EnumProperty,
     'new_choice':MyEnumProperty,
+    'symbols':SymbolListProperty,
+
 }
 #convert text to real value
 xfos={

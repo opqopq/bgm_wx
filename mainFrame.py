@@ -823,8 +823,11 @@ class MainFrame(wx.Frame):
                 dir = dlg.GetPath()
                 # Your code
                 wx.BeginBusyCursor()
-                import printer
-                printer.format(self.GetCurrentDeck(),dir,self.deckname,fitting_size=self.fitting_size,templates=self.templates)
+                ##from formatadvancedialog import FormatAdvanceDialog
+                ##f=FormatAdvanceDialog(self,title="Creating PDF Formatted document",dir=dir)
+                from config import PRINT_ENGINE
+                pmod=__import__(PRINT_ENGINE+'printer')
+                pmod.format(self.GetCurrentDeck(),dir,self.deckname,fitting_size=self.fitting_size,templates=self.templates)
                 wx.EndBusyCursor()
                 self.statusBar1.SetStatusText('Formatting Done !')
                 import os
@@ -835,8 +838,8 @@ class MainFrame(wx.Frame):
 
     def OnFilemenuIdnewMenu(self, event):
         self.currentdeck=dict()
-        self.deckgrid.DeleteAllItems()
-        self.deckgrid.numrow=0
+        self.deckgrid.SelectAll()
+        self.deckgrid.DeleteSelections()
         self.SetTitle('New Deck - UnSaved')
         self.deckname="new"
         self.updateinfo()
@@ -882,7 +885,7 @@ class MainFrame(wx.Frame):
             try:
                 w,h=dlg.GetValues()
                 self.fitting_size=(int(w),int(h))
-                self.fit.Value="%sx%s"%(w,h)
+                self.fit.Label="%sx%s"%(w,h)
             finally:
                 dlg.Destroy()
     

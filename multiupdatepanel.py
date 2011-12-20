@@ -8,11 +8,11 @@ class MultiUpdatePanel(wx.Dialog):
         def __init__(self,parent,newCard,oldCard):
             self.newCard=newCard
             self.oldCard=oldCard
-            if newCard.Values:
+            if newCard.Template:
                 size=(600,350+max(0,20*(len(newCard.Values)-5)))
             else:
                 size=(250,350)
-            wx.Dialog.__init__(self,parent,size=size,style=wx.DEFAULT_DIALOG_STYLE)
+            wx.Dialog.__init__(self,parent,size=size,style=wx.DEFAULT_DIALOG_STYLE| wx.RESIZE_BORDER)
             self.Title="Multi Update Panel"
             self.Sizer=wx.BoxSizer(wx.VERTICAL)
             self.Sizer.Add(wx.StaticText(self,-1,'Choose what you want to update.'),0,wx.ALL|wx.ALIGN_CENTER_HORIZONTAL,15)
@@ -39,7 +39,7 @@ class MultiUpdatePanel(wx.Dialog):
                 self.cardoptions.append(w)
             thebox.Add(bsizer, 1, wx.EXPAND|wx.ALL, 10)
             #Template option
-            if newCard.Values:
+            if newCard.Template:
                 box2 = wx.StaticBox(self, -1, "Template Options:")
                 bsizer2 = wx.StaticBoxSizer(box2, wx.VERTICAL)
                 w=wx.CheckBox(self,-1,"All card Options")
